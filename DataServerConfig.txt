@@ -1,0 +1,1 @@
+RMI Registry=6500
