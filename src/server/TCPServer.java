@@ -2,45 +2,45 @@ package server;
 // TCPServer2.java: Multithreaded server
 import java.net.*;
 import java.rmi.Naming;
+import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
+import java.rmi.registry.LocateRegistry;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Scanner;
 import java.util.StringTokenizer;
 import java.io.*;
 import static java.lang.System.*;
+
 
 public class TCPServer{
 	
 	public static String rmiHost;
 	public static int rmiPort;
-	public static String Server;
-	public static int ServerPort;
-	public static String SecundaryServer;
-	public static int SecundaryServerPort;
+	public static String ServerAHost;
+	public static int ServerAPort;
+	public static String ServerBHost;
+	public static int ServerBPort;
 	
-    public static void main(String args[]){
-        int numero=0;
-        ArrayList<Connection> connections = new ArrayList<Connection>();
-        
-        try{
-            int serverPort = 12345;
-            System.out.println("A Escuta no Porto 12345");
-            ServerSocket listenSocket = new ServerSocket(serverPort);
-            System.out.println("LISTEN SOCKET="+listenSocket);
-            while(true) {
-                Socket clientSocket = listenSocket.accept(); // BLOQUEANTE
-                System.out.println("CLIENT_SOCKET (created at accept())="+clientSocket);
-                numero ++;
-                connections.add(new Connection(clientSocket,connections, numero));
-            }
-        }catch(IOException e)
-        {System.out.println("Listen:" + e.getMessage());}
-    }
-    public static void carregaServerConfig(){
-		String file = "ServerAConfig.txt";
+	public static void main(String[] args){
+		carregaServerConfig();
+		//ServerA servidor = new ServerA(serverAHost,serverAPort,rmiHost,rmiPort);
+		Scanner sc1 = new Scanner(System.in);
+		System.out.print("1 - ServerA\n2 - ServerB\n: ");
+		String opc = sc1.nextLine();
+		if(opc.equals("1")){
+			new ServerA(ServerAHost,ServerAPort,rmiHost,rmiPort,ServerBHost,ServerBPort);
+		}else if(opc.equals("2")){
+			new ServerB(ServerBHost,ServerBPort,rmiHost,rmiPort,ServerAHost,ServerAPort);
+		}
+	}
+	
+	
+	public static void carregaServerConfig(){
+		String file = "TCPServerConfig.txt";
 		String line;
 		StringTokenizer tokenizer;
-		System.out.println("Uploding Server A configurations...");
+		System.out.println("Uploding Server configurations...");
 		try{
 			FileReader inputFile = new FileReader(file);
 			BufferedReader buffer = new BufferedReader(inputFile);
@@ -49,17 +49,17 @@ public class TCPServer{
 				tokenizer = new StringTokenizer(line,"=");
 				line = tokenizer.nextToken();
 				if(line.equals("Server A Host")){
-					serverAHost = tokenizer.nextToken();
+					ServerAHost = tokenizer.nextToken();
 				}else if(line.equals("Server A Port")){
-					serverAPort = Integer.parseInt(tokenizer.nextToken());
+					ServerAPort = Integer.parseInt(tokenizer.nextToken());
 				}else if(line.equals("RMI Host")){
 					rmiHost = tokenizer.nextToken();
 				}else if(line.equals("RMI Port")){
 					rmiPort = Integer.parseInt(tokenizer.nextToken());
 				}else if(line.equals("Server B Host")){
-					serverBHost = tokenizer.nextToken();
+					ServerBHost = tokenizer.nextToken();
 				}else if(line.equals("Server B Port")){
-					serverBPort = Integer.parseInt(tokenizer.nextToken());
+					ServerBPort = Integer.parseInt(tokenizer.nextToken());
 				}
 			}
 		}catch(FileNotFoundException e){
@@ -72,34 +72,106 @@ public class TCPServer{
 
 	}
 }
+class ServerA extends Thread{
+	public String myHost;
+	public int myPort;
+	public String targetHost;
+	public int targetPort;
+	public String rmiHost;
+	public int rmiPort;
+	public Receiver receiver;
+	public MulticastSocket multiSocket;
+	public String group;
 
+	public ServerA(String myHost,int myPort,String rmiHost,int rmiPort,String targetHost, int targetPort){
+		this.myHost=myHost;
+		this.myPort=myPort;
+		this.rmiHost=rmiHost;
+		this.rmiPort=rmiPort;
+		this.targetHost=targetHost;
+		this.targetPort=targetPort;
+		this.receiver = new Receiver(myPort,rmiHost,rmiPort);
+		this.start();
+	}
+	public void run(){
+		/*
+		 * Aqui será feita a comunicação com o servidor B através do protocolo UDP
+		 */
+	}
+}
 
+class ServerB extends Thread{
+	public String myHost;
+	public int myPort;
+	public String targetHost;
+	public int targetPort;
+	public String rmiHost;
+	public int rmiPort;
+	public Receiver receiver;
+	public MulticastSocket multiSocket;
+	public String group;
 
+	public ServerB(String myHost,int myPort,String rmiHost,int rmiPort,String targetHost, int targetPort){
+		this.myHost=myHost;
+		this.myPort=myPort;
+		this.rmiHost=rmiHost;
+		this.rmiPort=rmiPort;
+		this.targetHost=targetHost;
+		this.targetPort=targetPort;
+		this.receiver = new Receiver(myPort,rmiHost,rmiPort);
+		this.start();
+	}
+	public void run(){
+		/*
+		 * Aqui será feita a comunicação com o servidor A através do protocolo UDP
+		 */
+	}
+}
+class Receiver extends Thread{
+	public int myPort;
+	public String rmiHost;
+	public int rmiPort;
+	public int thread_id = 0;
+	public ArrayList<Connection> connections = new ArrayList<Connection>();
+	
+	public Receiver(int myPort,String rmiHost,int rmiPort){
+		this.myPort=myPort;
+		this.rmiHost=rmiHost;
+		this.rmiPort=rmiPort;
+		this.start();
+	}
+	
+	public void run(){
+		try{
+            ServerSocket listenSocket = new ServerSocket(myPort);
+            System.out.println("LISTEN SOCKET="+listenSocket);
+            while(true) {
+                Socket clientSocket = listenSocket.accept(); // BLOQUEANTE
+                System.out.println("CLIENT_SOCKET (created at accept())="+clientSocket);
+                thread_id ++;
+                connections.add(new Connection(clientSocket,connections,rmiHost,rmiPort,thread_id));
+            }
+        }catch(IOException e)
+        {System.out.println("Listen:" + e.getMessage());}
+	}
 
-
-
-
-
-
-
-
-
-
-
-
-
-//= Thread para tratar de cada canal de comunicação com um cliente
+}
 class Connection extends Thread {
-	BufferedReader inStream = null;
-    PrintWriter outStream;
-    Socket clientSocket;
-    int thread_number;
-    ArrayList<Connection> lista;
+	public BufferedReader inStream = null;
+    public PrintWriter outStream;
+    public Socket clientSocket;
+    public String rmiHost;
+	public int rmiPort;
+    public int thread_id;
+    public RMI rmi = null;
+    public ArrayList<Connection> lista;
     
-    public Connection (Socket aClientSocket,ArrayList<Connection> connections, int numero) {
-        thread_number = numero;
-        lista=connections;
-        clientSocket=aClientSocket;
+    public Connection (Socket aClientSocket,ArrayList<Connection> connections,String rmiHost,int rmiPort, int numero) {
+        this.thread_id = numero;
+        this.lista=connections;
+        this.clientSocket=aClientSocket;
+        this.rmiHost=rmiHost;
+        this.rmiPort=rmiPort;
         try{
 	            inStream = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 	            outStream = new PrintWriter(clientSocket.getOutputStream(), true);
@@ -108,17 +180,21 @@ class Connection extends Thread {
     }
     //=============================
     public void run(){
-    	//Conecção ao rmi ----->falta
         try{
+        	rmi = (RMI) Naming.lookup("rmi://"+rmiHost+":"+rmiPort+"/rmi");
             while(true){
 
-            	readComandLine(inStream.readLine());
+            	readComandLine(inStream.readLine(),rmi);
             }
         }catch(EOFException e){System.out.println("EOF:" + e);
-        }catch(IOException e){System.out.println("IO:" + e);}
+        }catch(IOException e){System.out.println("IO:" + e);
+        }catch(NotBoundException e){
+        	System.out.println("Error no lookup method");
+        	System.exit(0);
+        }
     }
     
-    public static void readComandLine(String s){
+    public static void readComandLine(String s,RMI rmi){
     	try{
         	HashMap<String, String> m = ProtocolParser.parse(s);
         	
@@ -126,12 +202,13 @@ class Connection extends Thread {
         		case("login"):{
         			String username = m.get("username").equals(null)?null:m.get("username");
 	    			String password = m.get("password").equals(null)?null:m.get("password");
-	    			
+	    			rmi.sayHello(username,password);
+	    			break;
         		}
         		case("satus"):{
         			String logged = m.get("logged").equals(null)?null:m.get("logged");
         			String msg = m.get("msg").equals(null)?null:m.get("msg");
-        			
+        			break;        			
         		}
         		
         	}
@@ -139,3 +216,4 @@ class Connection extends Thread {
     	}catch(Exception e){ System.out.println("type: error_message, status: not enought arguments");};
     }
 }
+	

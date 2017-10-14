@@ -2,5 +2,5 @@ package server;
 import java.rmi.*;
 
 public interface RMI extends Remote {
-	public String sayHello() throws java.rmi.RemoteException;
+	public String sayHello(String username,String password) throws java.rmi.RemoteException;
 }

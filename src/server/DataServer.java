@@ -199,8 +199,8 @@ public class DataServer extends UnicastRemoteObject implements RMI {
 
     //criar uma cena que automatiza o encontro da eleicao
     @Override
-    public synchronized String sayHello() throws RemoteException {
-        System.out.println("print do lado do servidor...!.");
+    public synchronized String sayHello(String username, String password) throws RemoteException {
+        System.out.println(username+"\n"+password);
 
         return "Hello, World!";
     }
@@ -211,7 +211,7 @@ public class DataServer extends UnicastRemoteObject implements RMI {
         try {
         	Registry createRMIRegistry = LocateRegistry.createRegistry(rmiRegistry);
 			DataServer dataserver = new DataServer();
-			createRMIRegistry.rebind("benfica", dataserver);
+			createRMIRegistry.rebind("rmi", dataserver);
             System.out.println("Hello Server ready.");
         } catch (RemoteException re) {
             System.out.println("Exception in HelloImpl.main: " + re);
