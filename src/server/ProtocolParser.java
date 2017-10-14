@@ -27,4 +27,19 @@ public class ProtocolParser {
 			return im;
     	}).collect(Collectors.toList());
     }
+    
+    public static void main(String[] args) {
+    	String a = "type : search_auction , items_count : 2, items_0_id : 101, items_0_code : 9780451524935, items_0_title : 1984, items_1_id : 103, items_1_code : 9780451524935, items_1_title : 1984 usado";
+    	HashMap<String, String> m = ProtocolParser.parse(a);
+    	
+    	assert(m.get("type").equals("search_auction"));
+    	assert(ProtocolParser.getList(m, "items").size() > 0);
+    	assert(ProtocolParser.getList(m, "items").get(0).get("id").equals("101"));
+    	assert(ProtocolParser.getList(m, "items").get(1).get("code").equals("9780451524935"));
+    	
+    	for (HashMap<String, String> element : ProtocolParser.getList(m, "items")) {
+    		assert(Integer.parseInt(element.get("id")) > 0);
+    	}
+    	
+    }
 }
