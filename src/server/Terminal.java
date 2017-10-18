@@ -18,12 +18,12 @@ import java.util.*;
  * @author Alcides Fonseca
  * @version 1.1
  */
-class TCPClient {
-	/*public static void carregaServerConfig(){
+class Terminal {
+	public static void carregaServerConfig(){
 		String file = "TCPClientConfig.txt";
 		String line;
 		StringTokenizer tokenizer;
-		System.out.println("Uploding Server configurations...");
+		System.out.println("Uploding Client configurations...");
 		try{
 			FileReader inputFile = new FileReader(file);
 			BufferedReader buffer = new BufferedReader(inputFile);
@@ -54,7 +54,7 @@ class TCPClient {
 			System.out.println("Erro a carregar os dados do ficheiro");
 		}
 
-}*/
+}
   public static void main(String[] args) {
     Socket socket;
     PrintWriter outToServer;

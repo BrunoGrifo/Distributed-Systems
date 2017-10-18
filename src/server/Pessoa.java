@@ -1,17 +1,19 @@
-package server;
 /*
-
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
+package server;
 /**
  *
  * @author ASUS
  */
-public class Pessoa {
-    String nome;
+public class Pessoa implements java.io.Serializable{
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	String nome;
     String cargo;
     String password;
     String departamento;
@@ -20,7 +22,7 @@ public class Pessoa {
     int numero_cc;
     String validade_cc;
     
-    Pessoa(String nome, String cargo, String password, String departamento, String faculdade, int telefone, int numero_cc, String validade_cc){
+    Pessoa(String nome, String cargo, String password, String departamento,String faculdade, int telefone, int numero_cc, String validade_cc){
         this.nome=nome;
         this.cargo=cargo;
         this.password=password;

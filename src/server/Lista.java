@@ -1,5 +1,5 @@
 package server;
-import java.util.ArrayList;
+import java.util.HashMap;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -11,15 +11,14 @@ import java.util.ArrayList;
  *
  * @author ASUS
  */
-public class Lista {
-    ArrayList<Pessoa> estudantes = new ArrayList<>();
-    ArrayList<Pessoa> docentes = new ArrayList<>();
-    ArrayList<Pessoa> funcionarios = new ArrayList<>();
-    
-    Lista(ArrayList<Pessoa> estudantes,ArrayList<Pessoa> docentes,ArrayList<Pessoa> funcionarios){
-        this.estudantes=estudantes;
-        this.docentes=docentes;
-        this.funcionarios=funcionarios;
+public class Lista implements java.io.Serializable{
+
+	private static final long serialVersionUID = 1L;
+	
+	HashMap<String,HashMap<String,Integer>> todas_listas;
+
+    Lista(HashMap<String,HashMap<String,Integer>> todas_listas){
+        this.todas_listas=todas_listas;
     }
 
 }

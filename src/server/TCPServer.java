@@ -1,5 +1,4 @@
 package server;
-// TCPServer2.java: Multithreaded server
 import java.net.*;
 import java.rmi.Naming;
 import java.rmi.NotBoundException;
@@ -62,6 +61,7 @@ public class TCPServer{
 					ServerBPort = Integer.parseInt(tokenizer.nextToken());
 				}
 			}
+			buffer.close();
 		}catch(FileNotFoundException e){
 			System.out.println("File "+file+" not found");
 			System.exit(0);
@@ -158,7 +158,7 @@ class Receiver extends Thread{
 }
 class Connection extends Thread {
 	public BufferedReader inStream = null;
-    public PrintWriter outStream;
+    public static PrintWriter outStream;
     public Socket clientSocket;
     public String rmiHost;
 	public int rmiPort;
@@ -202,14 +202,16 @@ class Connection extends Thread {
         		case("login"):{
         			String username = m.get("username").equals(null)?null:m.get("username");
 	    			String password = m.get("password").equals(null)?null:m.get("password");
-	    			rmi.sayHello(username,password);
+	    			String ola=rmi.sayHello(username,password);
+	    			outStream.println(ola);
+	    			outStream.println(ola);
 	    			break;
         		}
-        		case("satus"):{
+        		/*case("satus"):{
         			String logged = m.get("logged").equals(null)?null:m.get("logged");
         			String msg = m.get("msg").equals(null)?null:m.get("msg");
         			break;        			
-        		}
+        		}*/
         		
         	}
         	

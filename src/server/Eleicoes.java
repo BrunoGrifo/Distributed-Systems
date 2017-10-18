@@ -11,16 +11,23 @@ import java.util.ArrayList;
  *
  * @author ASUS
  */
-public class Eleicoes {
-    String tipo;
-    String inicio;
-    String fim;
-    String titulo;
-    String resumo;
-    Lista listas;
-    ArrayList<Mesas> mesas_votos;
+public class Eleicoes implements java.io.Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	public String tipo;
+    public String inicio;
+    public String fim;
+    public String titulo;
+    public String resumo;
+    public Lista listas;
+    public ArrayList<Mesas> mesas_votos;
+    public int votos_total;
+    public int votos_branco;
     
-    Eleicoes(String tipo,String inicio,String fim,String titulo,String resumo,Lista listas,ArrayList<Mesas> mesas_votos){
+    public Eleicoes(String tipo,String inicio,String fim,String titulo,String resumo,Lista listas,ArrayList<Mesas> mesas_votos, int votos_total,int votos_branco){
         this.tipo=tipo;
         this.inicio=inicio;
         this.fim=fim;
@@ -28,5 +35,7 @@ public class Eleicoes {
         this.resumo=resumo;
         this.listas=listas;
         this.mesas_votos=mesas_votos;
+        this.votos_total=votos_total;
+        this.votos_branco=votos_branco;
     }
 }

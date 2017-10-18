@@ -4,17 +4,20 @@
  * and open the template in the editor.
  */
 package server;
+
+import java.io.Serializable;
+
 /**
  *
  * @author ASUS
  */
-public class Mesas implements java.io.Serializable{
+public class Department implements Serializable {
     /**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	String departamento;
-    Mesas(String departamento){
-        this.departamento=departamento;
+	public String name;
+    public Department(String name){
+        this.name=name;
     }
 }
