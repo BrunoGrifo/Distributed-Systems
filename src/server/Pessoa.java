@@ -4,6 +4,9 @@
  * and open the template in the editor.
  */
 package server;
+
+import java.util.Date;
+
 /**
  *
  * @author ASUS
@@ -16,13 +19,13 @@ public class Pessoa implements java.io.Serializable{
 	String nome;
     String cargo;
     String password;
-    String departamento;
-    String faculdade;
+    Department departamento;
+    Faculty faculdade;
     int telefone;
     int numero_cc;
-    String validade_cc;
+    Date validade_cc;
     
-    Pessoa(String nome, String cargo, String password, String departamento,String faculdade, int telefone, int numero_cc, String validade_cc){
+    Pessoa(String nome, String cargo, String password, Department departamento,Faculty faculdade, int telefone, int numero_cc, Date validade_cc){
         this.nome=nome;
         this.cargo=cargo;
         this.password=password;
