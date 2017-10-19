@@ -1,5 +1,6 @@
 package server;
 import java.util.ArrayList;
+import java.util.Date;
 
 /*
  * To change this license header, choose License Headers in Project Properties.
@@ -17,25 +18,35 @@ public class Eleicoes implements java.io.Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	public String tipo;
-    public String inicio;
-    public String fim;
-    public String titulo;
-    public String resumo;
-    public Lista listas;
-    public ArrayList<Mesas> mesas_votos;
-    public int votos_total;
-    public int votos_branco;
+	String tipo;
+    Date start;
+    Date end;
+    String titulo;
+    String resumo;
+    Lista listas;
+    ArrayList<Mesas> mesas_votos;
+    int votos_total;
+    int votos_branco;
     
-    public Eleicoes(String tipo,String inicio,String fim,String titulo,String resumo,Lista listas,ArrayList<Mesas> mesas_votos, int votos_total,int votos_branco){
+    Eleicoes(String tipo,Date start,Date end,String titulo,String resumo,Lista listas,ArrayList<Mesas> mesas_votos, int votos_total,int votos_branco){
         this.tipo=tipo;
-        this.inicio=inicio;
-        this.fim=fim;
+        this.start=start;
+        this.end=end;
         this.titulo=titulo;
         this.resumo=resumo;
         this.listas=listas;
         this.mesas_votos=mesas_votos;
         this.votos_total=votos_total;
-        this.votos_branco=votos_branco;
+        this.votos_branco=votos_branco;//falta o print das datas
+    }
+    
+    public String toString(){
+        String tables="";
+        for(Mesas x:mesas_votos){
+            tables+=x.toString()+"\n";
+        }
+        return "Title of election: "+titulo+"\t|\ttype of election: "+tipo+"\nresume of election:\n"
+                +resumo+ "\nStarting data:"+start+"\nEnding date:"+end+"\n\nLists up to vote:\n"+listas.toString()+"\ntables avaible:\n"+tables+"\ntotal votes: "
+                +votos_total+"\nblanc votes: "+votos_branco+"\n";
     }
 }

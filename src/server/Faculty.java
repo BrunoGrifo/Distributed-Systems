@@ -1,4 +1,5 @@
 package server;
+
 import java.util.ArrayList;
 
 /*
@@ -10,34 +11,34 @@ import java.util.ArrayList;
  *
  * @author ASUS
  */
-public class Faculty implements java.io.Serializable{
+public class Faculty implements java.io.Serializable {
 
-    /**
+	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	public String name;
-    public ArrayList<Department> departments;
+	String name;
+	ArrayList<Department> departments;
 
-    public Faculty(String name) {
-        this.name = name;
-        departments = new ArrayList<>();
-    }
+	Faculty(String name) {
+		this.name = name;
+		departments = new ArrayList<>();
+	}
 
-    /**
-     *
-     * @return
-     */
-    @Override
-    public String toString() {
-        String string_departments = "";
-        for (Department x : departments) {
-            string_departments += "->   " + x.name + "\n\t\t";
-        }
-        if (!string_departments.equals("")) {
-            return "Faculty: " + name + "\nDepartments: " + string_departments;
-        }else{
-            return "Faculty: " + name + "\nDepartments: none found\n";
-        }
-    }
+	/**
+	 *
+	 * @return
+	 */
+	@Override
+	public String toString() {
+		String string_departments = "";
+		for (Department x : departments) {
+			string_departments += "\n->" + x.name;
+		}
+		if (!string_departments.equals("")) {
+			return name + "\nDepartments: " + string_departments;
+		} else {
+			return name + "\nDepartments: none found";
+		}
+	}
 }

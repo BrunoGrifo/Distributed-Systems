@@ -1,6 +1,8 @@
 package server;
 
 import java.io.*;
+import java.lang.reflect.Array;
+
 import static java.lang.System.out;
 import java.rmi.*;
 import java.rmi.registry.LocateRegistry;
@@ -136,6 +138,143 @@ public class DataServer extends UnicastRemoteObject implements RMI {
 
 		return "Hello, World!";
 	}
+	
+	public synchronized Eleicoes procura_eleicao(String titulo_eleicao) {
+        for (Eleicoes x : eleitores) {
+            if (x.titulo.equals(titulo_eleicao)) {
+                return x;
+            }
+        }
+        return null;
+    }
+	public synchronized Lista cria_listas(HashMap<String, ArrayList<Lista_candidata>> listas) { //hashmap DAR ERRO AQUI
+        HashMap<String, HashMap<Lista_candidata, Integer>> temporaria = new HashMap<>();
+        HashMap<Lista_candidata, Integer> temporaria1 = new HashMap<>();
+        HashMap<Lista_candidata, Integer> temporaria2 = new HashMap<>();
+        HashMap<Lista_candidata, Integer> temporaria3 = new HashMap<>();
+        for (HashMap.Entry<String, ArrayList<Lista_candidata>> entry : listas.entrySet()) {
+            if (entry.getKey().equals("students")) {
+                for (Lista_candidata x : entry.getValue()) {
+                    temporaria1.put(x, 0);
+                }
+                temporaria.put(entry.getKey(), temporaria1);
+            } else if (entry.getKey().equals("teachers")) {
+                for (Lista_candidata x : entry.getValue()) {
+                    temporaria2.put(x, 0);
+                }
+                temporaria.put(entry.getKey(), temporaria2);
+            } else if (entry.getKey().equals("staff")) {
+                for (Lista_candidata x : entry.getValue()) {
+                    temporaria3.put(x, 0);
+                }
+                temporaria.put(entry.getKey(), temporaria3);
+            }
+
+        }
+        Lista nova_lista = new Lista(temporaria);
+        return nova_lista;
+    }
+	public synchronized ArrayList<Mesas> getMesas_votos_todas(){
+		return mesas_votos_todas;
+	}
+	public synchronized void addNewElection(Eleicoes new_e){
+		eleitores.add(new_e);
+	}
+	public synchronized void removePerson(Pessoa pessoa) {
+		pessoas.remove(pessoa);
+	}
+	public synchronized ArrayList<Department> return_departments() {
+        return departments;
+    }
+	public synchronized void removeDepartment(Department dep) {
+		departments.remove(dep);
+	}
+	public synchronized void removeMesaVoto(Mesas mesa) {
+		mesas_votos_todas.remove(mesa);
+	}
+	public synchronized void assing_departments_to_facultys(Faculty faculty_chosen) {
+        int i = 1, check = 0, option = 0;
+        for (int j = 0; j < 2; j++) {
+            i = 0;
+            if (j == 0) {
+                out.print("Departments avaible to be added:\n");
+            }
+            for (Department k : departments) {
+                check = 0;
+                for (Faculty x : faculdades) {
+                    if (x.departments.contains(k)) {
+                        check = 1;
+                    }
+                }
+                if (check == 0 && j == 0) {
+                    ++i;
+                    out.print(i + "-" + k.name + "\n");
+                }
+                if (check == 0 && j == 1) {
+                    ++i;
+                    if (i == option) {
+                        faculty_chosen.departments.add(k);
+                    }
+                }
+
+            }
+            if (j == 0) {
+                option = inputI.nextInt();
+            }
+        }
+    }
+	public synchronized void remove_departments_from_facultys(Faculty faculty_chosen) {
+        int opcao = 1, i, check = 0;
+        Department delete_department = null;
+        while (opcao != 0) {
+            i = 0;
+            out.print("Departments avaible from this faculty to be removed:\n");
+            for (int j = 0; j < 2; j++) {
+                i = 0;
+                for (Department x : faculty_chosen.departments) {
+                    check = 0;
+                    for (Pessoa k : pessoas) {
+                        if (k.departamento.equals(x)) {
+                            check = 1;
+                        }
+                    }
+                    if (check == 0 && j == 0) {
+                        ++i;
+                        out.print(i + "-" + x.toString() + "\n");
+                    }
+                    if (check == 0 && j == 1) {
+                        ++i;
+                        if (i == opcao) {
+                            delete_department = x;
+                        }
+                    }
+
+                }
+                out.print("0-Exit\n");
+                opcao = inputI.nextInt();
+            }
+            faculty_chosen.departments.remove(delete_department);
+
+        }
+    }
+	public synchronized String print_tables(){
+        String print_tables="";
+        int i = 1;
+        for (Mesas x : mesas_votos_todas) {
+            print_tables += i + "-" + x.toString() + "\n";
+            i++;
+        }
+        return print_tables;
+    }
+	public synchronized String print_elections() {
+        String elections = "";
+        int i = 1;
+        for (Faculty x : faculdades) {
+            elections += i + "-" + x.toString() + "\n";
+            i++;
+        }
+        return elections;
+    }
 
 	// =========================================================
 	public static void main(String args[]) {

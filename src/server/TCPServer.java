@@ -80,7 +80,6 @@ class ServerA extends Thread {
 	public String rmiHost;
 	public int rmiPort;
 	public Receiver receiver;
-	public MulticastSocket multiSocket;
 	public String group;
 
 	public ServerA(String myHost, int myPort, String rmiHost, int rmiPort, String targetHost, int targetPort) {
@@ -109,7 +108,6 @@ class ServerB extends Thread {
 	public String rmiHost;
 	public int rmiPort;
 	public Receiver receiver;
-	public MulticastSocket multiSocket;
 	public String group;
 
 	public ServerB(String myHost, int myPort, String rmiHost, int rmiPort, String targetHost, int targetPort) {
