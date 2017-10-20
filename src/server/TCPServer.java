@@ -28,9 +28,9 @@ public class TCPServer {
 		System.out.print("1 - ServerA\n2 - ServerB\n: ");
 		String opc = sc1.nextLine();
 		if (opc.equals("1")) {
-			new ServerA(ServerAHost, ServerAPort, rmiHost, rmiPort, ServerBHost, ServerBPort);
+			new Server(ServerAHost, ServerAPort, rmiHost, rmiPort);
 		} else if (opc.equals("2")) {
-			new ServerB(ServerBHost, ServerBPort, rmiHost, rmiPort, ServerAHost, ServerAPort);
+			new Server(ServerBHost, ServerBPort, rmiHost, rmiPort);
 		}
 	}
 
@@ -72,23 +72,20 @@ public class TCPServer {
 	}
 }
 
-class ServerA extends Thread {
+class Server extends Thread {
 	public String myHost;
 	public int myPort;
-	public String targetHost;
-	public int targetPort;
 	public String rmiHost;
 	public int rmiPort;
 	public Receiver receiver;
 	public String group;
 
-	public ServerA(String myHost, int myPort, String rmiHost, int rmiPort, String targetHost, int targetPort) {
+	public Server(String myHost, int myPort, String rmiHost, int rmiPort) {
 		this.myHost = myHost;
 		this.myPort = myPort;
 		this.rmiHost = rmiHost;
 		this.rmiPort = rmiPort;
-		this.targetHost = targetHost;
-		this.targetPort = targetPort;
+
 		this.receiver = new Receiver(myPort, rmiHost, rmiPort);
 		this.start();
 	}
@@ -96,34 +93,6 @@ class ServerA extends Thread {
 	public void run() {
 		/*
 		 * Aqui será feita a comunicação com o servidor B através do protocolo UDP
-		 */
-	}
-}
-
-class ServerB extends Thread {
-	public String myHost;
-	public int myPort;
-	public String targetHost;
-	public int targetPort;
-	public String rmiHost;
-	public int rmiPort;
-	public Receiver receiver;
-	public String group;
-
-	public ServerB(String myHost, int myPort, String rmiHost, int rmiPort, String targetHost, int targetPort) {
-		this.myHost = myHost;
-		this.myPort = myPort;
-		this.rmiHost = rmiHost;
-		this.rmiPort = rmiPort;
-		this.targetHost = targetHost;
-		this.targetPort = targetPort;
-		this.receiver = new Receiver(myPort, rmiHost, rmiPort);
-		this.start();
-	}
-
-	public void run() {
-		/*
-		 * Aqui será feita a comunicação com o servidor A através do protocolo UDP
 		 */
 	}
 }
@@ -211,9 +180,6 @@ class Connection extends Thread {
 			case ("login"): {
 				String username = m.get("username").equals(null) ? null : m.get("username");
 				String password = m.get("password").equals(null) ? null : m.get("password");
-				String ola = rmi.sayHello(username, password);
-				outStream.println(ola);
-				outStream.println(ola);
 				break;
 			}
 			/*
