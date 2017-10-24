@@ -4,6 +4,7 @@ import java.rmi.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public interface RMI extends Remote {
 
@@ -20,14 +21,11 @@ public interface RMI extends Remote {
 
 	public void create_faculty(String name) throws java.rmi.RemoteException;
 
-	public boolean search_election(String title) throws java.rmi.RemoteException; // ver se esta e a ourt nao fazem a
-																					// mesma coisa
+	public boolean search_election(String title) throws java.rmi.RemoteException;
 
 	public boolean search_faculty(String name) throws java.rmi.RemoteException;
 
 	public boolean search_department(String name) throws java.rmi.RemoteException;
-
-	public Eleicoes procura_eleicao(String titulo_eleicao) throws java.rmi.RemoteException;
 
 	public boolean search_table(String name) throws java.rmi.RemoteException;
 
@@ -65,5 +63,16 @@ public interface RMI extends Remote {
 
 	public ArrayList<Eleicoes> return_elections() throws java.rmi.RemoteException;
 
+	public String update_person(Pessoa update_person) throws java.rmi.RemoteException;
+
+	public String update_faculty(Faculty update_faculty) throws java.rmi.RemoteException;
+
+	public String update_election(Eleicoes update_election) throws java.rmi.RemoteException;
+
+	public String update_table(Mesas update_table) throws java.rmi.RemoteException;
+
+	public void sayHello() throws RemoteException;
+	
+	public boolean getATerminal(int cc) throws RemoteException;
 
 }

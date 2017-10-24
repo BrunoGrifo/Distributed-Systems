@@ -7,6 +7,7 @@ import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 import java.io.*;
@@ -27,10 +28,11 @@ public class TCPServer {
 		Scanner sc1 = new Scanner(System.in);
 		System.out.print("1 - ServerA\n2 - ServerB\n: ");
 		String opc = sc1.nextLine();
+		final ArrayList<Connection> connections = new ArrayList<Connection>();
 		if (opc.equals("1")) {
-			new Server(ServerAHost, ServerAPort, rmiHost, rmiPort);
+			new Server(ServerAHost, ServerAPort, rmiHost, rmiPort,connections);
 		} else if (opc.equals("2")) {
-			new Server(ServerBHost, ServerBPort, rmiHost, rmiPort);
+			new Server(ServerBHost, ServerBPort, rmiHost, rmiPort,connections);
 		}
 	}
 
@@ -78,22 +80,75 @@ class Server extends Thread {
 	public String rmiHost;
 	public int rmiPort;
 	public Receiver receiver;
-	public String group;
+	public RMI rmi = null;
+	public ArrayList<Connection> connections;
 
-	public Server(String myHost, int myPort, String rmiHost, int rmiPort) {
+	public Server(String myHost, int myPort, String rmiHost, int rmiPort,ArrayList<Connection> connections) {
 		this.myHost = myHost;
 		this.myPort = myPort;
 		this.rmiHost = rmiHost;
 		this.rmiPort = rmiPort;
-
-		this.receiver = new Receiver(myPort, rmiHost, rmiPort);
+		this.connections=connections;
+		this.receiver = new Receiver(myPort, rmiHost, rmiPort,connections,rmi);
 		this.start();
 	}
 
 	public void run() {
-		/*
-		 * Aqui será feita a comunicação com o servidor B através do protocolo UDP
-		 */
+		String number_cc_string="";
+		Scanner inputS = new Scanner(System.in);
+		try {
+			rmi = (RMI) Naming.lookup("rmi://" + rmiHost + ":" + rmiPort + "/rmi");
+			while (true) {
+				do {
+					out.print("ID:");
+					try {
+						number_cc_string = inputS.nextLine();
+					} catch (InputMismatchException e) {
+						out.println("Invalid option");
+						inputS.next();
+					}
+				} while (!checkNumbers(number_cc_string) || number_cc_string.length() != 8);
+				if(rmi.getATerminal(Integer.parseInt(number_cc_string))) {
+					out.println("ID aceite!");
+					for(Connection x:connections) {
+						if(x.available.isAvailable()) {
+							out.println("Terminal "+x.thread_id+" livre.");
+							out.println("Diriga-se ao terminal de voto "+x.thread_id);
+							x.available.setAvailable(false);;
+							break;
+						}else {
+							out.println("Terminal "+x.thread_id+" ocupado.");
+						}
+					}
+					for (Connection x: connections) {
+						System.out.println("Terminal "+x.thread_id+" "+x.available.available);
+					}
+				}else {
+					out.println("Informamos o senhor que o cc inserido não existe ou voce é refugiado e está a tentar ter opinião num pais ao qual não percente, obrigado!");
+				}
+			}
+		}catch (IOException e) {
+			System.out.println("IO:" + e);
+		}catch (NotBoundException e) {
+			System.out.println("Error no lookup method");
+			System.exit(0);
+		}
+	}
+	public static boolean checkNumbers(String num) {
+		int i = 0;
+		char[] array = num.toCharArray();
+		while (num.length() != i) {
+			if ((int) array[i] > 57 || (int) array[i] < 48) {
+				out.println("Can not start or end with a space and can only ccontain numbers!");
+				return false;
+			}
+			i++;
+		}
+		if (num.length() == 0) {
+			out.println("Can not start or end with a space and can only ccontain numbers!");
+			return false;
+		}
+		return true;
 	}
 }
 
@@ -102,12 +157,14 @@ class Receiver extends Thread {
 	public String rmiHost;
 	public int rmiPort;
 	public int thread_id = 0;
-	public ArrayList<Connection> connections = new ArrayList<Connection>();
-
-	public Receiver(int myPort, String rmiHost, int rmiPort) {
+	public RMI rmi = null;
+	public ArrayList<Connection> connections;
+	public Receiver(int myPort, String rmiHost, int rmiPort,ArrayList<Connection> connections,RMI rmi) {
 		this.myPort = myPort;
 		this.rmiHost = rmiHost;
 		this.rmiPort = rmiPort;
+		this.connections=connections;
+		this.rmi=rmi;
 		this.start();
 	}
 
@@ -119,13 +176,15 @@ class Receiver extends Thread {
 				Socket clientSocket = listenSocket.accept(); // BLOQUEANTE
 				System.out.println("CLIENT_SOCKET (created at accept())=" + clientSocket);
 				thread_id++;
-				connections.add(new Connection(clientSocket, connections, rmiHost, rmiPort, thread_id));
+				connections.add(new Connection(clientSocket, connections, rmiHost, rmiPort, thread_id,rmi));
 			}
+		}catch (EOFException e) {
+			System.out.println("EOF:" + e);
 		} catch (IOException e) {
 			System.out.println("Listen:" + e.getMessage());
 		}
+		
 	}
-
 }
 
 class Connection extends Thread {
@@ -136,15 +195,17 @@ class Connection extends Thread {
 	public int rmiPort;
 	public int thread_id;
 	public RMI rmi = null;
-	public ArrayList<Connection> lista;
+	Available available;
+	ArrayList<Connection> lista;
 
-	public Connection(Socket aClientSocket, ArrayList<Connection> connections, String rmiHost, int rmiPort,
-			int numero) {
+	public Connection(Socket aClientSocket, ArrayList<Connection> connections, String rmiHost, int rmiPort,int numero, RMI rmi) {
 		this.thread_id = numero;
 		this.lista = connections;
 		this.clientSocket = aClientSocket;
 		this.rmiHost = rmiHost;
 		this.rmiPort = rmiPort;
+		this.rmi=rmi;
+		available=new Available();
 		try {
 			inStream = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 			outStream = new PrintWriter(clientSocket.getOutputStream(), true);
@@ -156,23 +217,29 @@ class Connection extends Thread {
 
 	// =============================
 	public void run() {
-		try {
-			rmi = (RMI) Naming.lookup("rmi://" + rmiHost + ":" + rmiPort + "/rmi");
-			while (true) {
-
-				readComandLine(inStream.readLine(), rmi);
-			}
-		} catch (EOFException e) {
-			System.out.println("EOF:" + e);
-		} catch (IOException e) {
-			System.out.println("IO:" + e);
-		} catch (NotBoundException e) {
-			System.out.println("Error no lookup method");
-			System.exit(0);
+		while(true) {
+			//if (available.isAvailable()){
+				try {
+					clientSocket.setSoTimeout(20000);
+					while(true) {
+						readComandLine(inStream.readLine(), rmi,available);
+					}
+				}catch (SocketTimeoutException ste) {
+					   System.out.println("### Timed out after 10 seconds");
+					   for (Connection x: lista) {
+							System.out.println("Terminal "+x.thread_id+" "+x.available);
+						}
+					   available.setAvailable(true);
+				} catch (EOFException e) {
+					System.out.println("EOF:" + e);
+				} catch (IOException e) {
+					System.out.println("IO:" + e);
+				}
+			//}
 		}
 	}
 
-	public static void readComandLine(String s, RMI rmi) {
+	public static void readComandLine(String s, RMI rmi, Available available) {
 		try {
 			HashMap<String, String> m = ProtocolParser.parse(s);
 
@@ -190,9 +257,24 @@ class Connection extends Thread {
 
 			}
 
-		} catch (Exception e) {
+		} catch (Exception e) {			
 			System.out.println("type: error_message, status: not enought arguments");
+			System.out.println(available.available);
 		}
-		;
 	}
+	
+	
+}
+class Available{
+	boolean available;
+	public Available() {
+		available=true;
+	}
+	public boolean isAvailable() {
+		return available;
+	}
+	public void setAvailable(boolean available) {
+		this.available = available;
+	}
+	
 }

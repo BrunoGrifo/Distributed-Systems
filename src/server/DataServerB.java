@@ -1,5 +1,6 @@
 package server;
 
+
 import java.io.*;
 import java.lang.reflect.Array;
 import java.net.DatagramPacket;
@@ -20,10 +21,11 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.StringTokenizer;
 
-public class DataServer extends UnicastRemoteObject implements RMI {
+public class DataServerB extends UnicastRemoteObject implements RMI {
 	public static int rmiRegistry;
 	public static int rmiPort;
 	public static int rmiPortSec;
+	public static int rmiRegistryS;
 	public static String rmiHost;
 	public static String rmiHostSec;
 	public Scanner inputI = new Scanner(System.in);
@@ -41,17 +43,20 @@ public class DataServer extends UnicastRemoteObject implements RMI {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public DataServer() throws RemoteException {
+	public DataServerB() throws RemoteException {
 		super();
 		new UDPConnection(rmiHost,rmiPort,rmiPortSec);
 	}
 	
+	public synchronized void sayHello() {
+		out.println("Server");
+	}
 
-	public synchronized static void load_config() {
-		String file = "DataServerConfig.txt";
+	public static void load_config() {
+		String file = "DataServerBConfig.txt";
 		String line;
 		StringTokenizer tokenizer;
-		System.out.println("Uploding DataServer configurations...");
+		System.out.println("Uploding DataServerB configurations...");
 		try {
 			FileReader inputFile = new FileReader(file);
 			BufferedReader buffer = new BufferedReader(inputFile);
@@ -77,19 +82,7 @@ public class DataServer extends UnicastRemoteObject implements RMI {
 			System.exit(0);
 		} catch (IOException e) {
 		}
-		System.out.println("DataServerConfig.txt successfully uploaded.");
-	}
-	public synchronized void sayHello() {
-		out.println("Server");
-	}
-	public synchronized boolean getATerminal(int cc) {
-		for(Pessoa x: pessoas) {
-			if(x.numero_cc==cc) {
-				return true;
-			}
-		}
-		return false;
-		
+		System.out.println("DataServerBConfig.txt successfully uploaded.");
 	}
 	public synchronized String update_person(Pessoa update_person) {
         int check = 0;
@@ -108,6 +101,7 @@ public class DataServer extends UnicastRemoteObject implements RMI {
             return "Critical failure ERROR 404 person not found\n";
         }
     }
+	
  
     public synchronized String update_table(Mesas update_table) {
         int check = 0;
@@ -424,6 +418,15 @@ public class DataServer extends UnicastRemoteObject implements RMI {
         }
         return print_election_resume;
     }
+    public synchronized boolean getATerminal(int cc) {
+		for(Pessoa x: pessoas) {
+			if(x.numero_cc==cc) {
+				return true;
+			}
+		}
+		return false;
+		
+	}
  
     @Override
     public synchronized String print_department_faculty(Faculty departs_print) {
@@ -469,96 +472,29 @@ public class DataServer extends UnicastRemoteObject implements RMI {
 	public static void main(String args[]) {
 		load_config();
 		try {
-			Registry createRMIRegistry = LocateRegistry.createRegistry(rmiRegistry);
-			DataServer dataserver = new DataServer();
-			createRMIRegistry.rebind("rmi", dataserver);
+			//Registry createRMIRegistry = LocateRegistry.createRegistry(rmiRegistry);
+			DataServerB DataServerB = new DataServerB();
+			//createRMIRegistry.rebind("rmi", DataServerB);
 			System.out.println("Hello Server ready: "+rmiRegistry);
+			Naming.rebind("rmi://" + "localhost" + ":" + rmiRegistry + "/rmi", DataServerB);
+			out.println(rmiRegistry);
 			
 		} catch (RemoteException re) {
 			try {
 				Registry createRMIRegistry = LocateRegistry.createRegistry(rmiRegistry);
-				DataServer dataserver = new DataServer();
-				createRMIRegistry.rebind("rmi", dataserver);
-				System.out.println("Hello Server ready: "+rmiRegistry);
+				DataServerB DataServerB = new DataServerB();
+				createRMIRegistry.rebind("rmi", DataServerB);
+				System.out.println("Hello Server ready1: "+rmiRegistry);
 				
 			}catch (RemoteException res) {
 				out.println("Error trying to create rmi registry");
 			}			
+		}
+		catch (MalformedURLException e) {
+			System.out.println("MalformedURLException in HelloImpl.main: " + e);
 		}
 		System.out.println("\n\nData Server is ready for business!!!");
 	}
 
 }
 
-class UDPConnection extends Thread{
-	DatagramSocket aSocket = null;
-	public int port;
-	public int portSec;
-	public String host;
-	public UDPConnection(String host,int port,int portSec){
-		this.host=host;
-		this.port=port;
-		this.portSec=portSec;
-		this.start();
-	}
-	public void run() {
-		String s;
-		try {
-			aSocket = new DatagramSocket(port);
-			new Thread() {		
-				public void run() {
-					DatagramSocket aSocket1 = null;
-					try {    
-						String texto = "";
-						while(true){
-							aSocket1 = new DatagramSocket();
-							try{
-								texto = "A tua Mãe";
-				     	  	}catch(Exception e){}
-							byte [] m = texto.getBytes();
-							InetAddress aHost = InetAddress.getByName(host);
-							int serverPort = portSec;		                                                
-							DatagramPacket request = new DatagramPacket(m,m.length,aHost,serverPort);
-							
-							aSocket1.send(request);
-							byte[] buffer = new byte[1000];
-							DatagramPacket reply = new DatagramPacket(buffer, buffer.length);	
-							aSocket1.receive(reply);
-							//System.out.println("Recebeu: " + new String(reply.getData(), 0, reply.getLength()));	
-						} // while
-					}catch (SocketException e){System.out.println("Socket: " + e.getMessage());
-					}catch (IOException e){System.out.println("IO: " + e.getMessage());
-					}finally {
-						if(aSocket != null) {
-							out.println("grifo1");
-							aSocket.close();
-						}
-					}
-						
-				}
-			}.start();
-			while(true){
-				byte[] buffer = new byte[1000]; 
-				DatagramPacket request = new DatagramPacket(buffer, buffer.length);
-				//try {
-					aSocket.receive(request);
-				//}catch (SocketTimeoutException ste) {
-				   // System.out.println("### Timed out after 10 seconds");
-				//}
-				s=new String(request.getData(), 0, request.getLength());	
-				//System.out.println("Server Recebeu: " + s);	
-				DatagramPacket reply = new DatagramPacket(request.getData(), 
-						request.getLength(), request.getAddress(), request.getPort());
-				aSocket.send(reply);
-			}
-		}catch (SocketException es){
-			System.out.println("Socket: " + es.getMessage());
-		}catch (IOException e) {System.out.println("IO: " + e.getMessage());
-		}finally {
-			if(aSocket != null) {
-				out.println("grifo");
-				aSocket.close();
-			}
-		}
-	}
-}

@@ -1,6 +1,6 @@
 Server A Host=localhost
 Server A Port=7000
 RMI Host=localhost
-RMI Port=6500
+RMI Port=7500
 Server B Host=localhost
 Server B Port=5000
