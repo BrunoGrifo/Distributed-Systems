@@ -140,7 +140,7 @@ class Terminal {
 		try {
 			FileReader inputFile = new FileReader(file);
 			BufferedReader buffer = new BufferedReader(inputFile);
-			for (int i = 0; i < 6; i++) {
+			for (int i = 0; i < 4; i++) {
 				line = buffer.readLine();
 				tokenizer = new StringTokenizer(line, "=");
 				line = tokenizer.nextToken();

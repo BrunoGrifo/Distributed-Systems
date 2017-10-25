@@ -81,7 +81,7 @@ class Server extends Thread {
 	public int rmiPort;
 	public Receiver receiver;
 	public RMI rmi = null;
-	public ArrayList<Connection> connections;
+	ArrayList<Connection> connections;
 
 	public Server(String myHost, int myPort, String rmiHost, int rmiPort,ArrayList<Connection> connections) {
 		this.myHost = myHost;
@@ -158,7 +158,7 @@ class Receiver extends Thread {
 	public int rmiPort;
 	public int thread_id = 0;
 	public RMI rmi = null;
-	public ArrayList<Connection> connections;
+	ArrayList<Connection> connections;
 	public Receiver(int myPort, String rmiHost, int rmiPort,ArrayList<Connection> connections,RMI rmi) {
 		this.myPort = myPort;
 		this.rmiHost = rmiHost;
@@ -218,24 +218,28 @@ class Connection extends Thread {
 	// =============================
 	public void run() {
 		while(true) {
-			//if (available.isAvailable()){
+			if (available.isAvailable()==false){
 				try {
-					clientSocket.setSoTimeout(20000);
+					clientSocket.setSoTimeout(30000);
 					while(true) {
 						readComandLine(inStream.readLine(), rmi,available);
+						
 					}
 				}catch (SocketTimeoutException ste) {
-					   System.out.println("### Timed out after 10 seconds");
-					   for (Connection x: lista) {
-							System.out.println("Terminal "+x.thread_id+" "+x.available);
-						}
+					   System.out.println("Terminal"+thread_id+" blocked. More then 120 sec without request");
 					   available.setAvailable(true);
 				} catch (EOFException e) {
 					System.out.println("EOF:" + e);
 				} catch (IOException e) {
 					System.out.println("IO:" + e);
 				}
-			//}
+			}
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 	}
 
