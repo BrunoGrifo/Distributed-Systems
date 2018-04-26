@@ -1,0 +1,5 @@
+RMI Registry=6000
+RMI UDP Port connection=8000
+RMI UDP Host connection=localhost
+RMI UDP sec Port connection=9000
+RMI UDP sec Host connection=localhost

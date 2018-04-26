@@ -1,0 +1,3 @@
+RMI Host=localhost
+RMI Port=6500
+RMI PortBackUp=6500

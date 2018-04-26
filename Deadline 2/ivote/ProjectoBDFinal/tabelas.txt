@@ -1,0 +1,186 @@
+CREATE TABLE eleicao_departamento(
+	ideleicao1 int NOT NULL,
+	departamento_nome varchar(60),
+
+	PRIMARY KEY(ideleicao1)
+
+);
+CREATE TABLE eleicao_faculdade(
+	ideleicao1 int NOT NULL,
+	faculdade_nome varchar(60),
+
+	PRIMARY KEY(ideleicao1)
+
+);
+
+
+CREATE TABLE eleitor(
+    cc       int,
+    nome     varchar(60) NOT NULL,
+    password     varchar(60) NOT NULL,
+    numtelefone int NOT NULL,
+    validadecc   date NOT NULL,
+    morada   varchar(60),
+    cargo   varchar(60) NOT NULL,
+ 
+    PRIMARY KEY(cc)
+);
+ 
+CREATE TABLE candidato(
+    id int NOT NULL,
+    classe varchar(60) NOT NULL,
+    nome varchar(60) NOT NULL,
+    num_votos    int,
+ 
+    PRIMARY KEY(id)
+);
+ 
+CREATE TABLE eleicao(
+    ideleicao    int,
+    data_inicio timestamp NOT NULL,
+    data_final   timestamp NOT NULL,
+    titulo   varchar(60) NOT NULL,
+    resumo   varchar(60) NOT NULL,
+    tipo    varchar(60) NOT NULL,
+ 
+    PRIMARY KEY(ideleicao)
+);
+ 
+CREATE TABLE departamento(
+    nome varchar(60),
+ 
+    PRIMARY KEY(nome)
+);
+ 
+CREATE TABLE faculdade(
+    nome varchar(60),
+ 
+    PRIMARY KEY(nome)
+);
+ 
+CREATE TABLE mesa_de_voto(
+    nome varchar(60),
+ 
+    PRIMARY KEY(nome)
+);
+ 
+CREATE TABLE votosbna(
+    num_votos_branco     int,
+    num_votos_nulos  int,
+    mesa_de_voto_nome varchar(60) UNIQUE NOT NULL,
+    eleicao_ideleicao int NOT NULL,
+ 
+    PRIMARY KEY(mesa_de_voto_nome)
+);
+ 
+CREATE TABLE eleitor_faculdade(
+    eleitor_cc   int,
+    faculdade_nome varchar(60) NOT NULL,
+ 
+    PRIMARY KEY(eleitor_cc)
+);
+ 
+CREATE TABLE eleitor_mesa_de_voto(
+    eleitor_cc   int,
+    mesa_de_voto_nome varchar(60),
+
+    PRIMARY KEY(eleitor_cc,mesa_de_voto_nome)
+);
+
+CREATE TABLE eleitor_mesa_insta(
+    eleitor_cc   int,
+    mesa_de_voto_nome varchar(60),
+    moment   timestamp NOT NULL,
+    
+    PRIMARY KEY(eleitor_cc,mesa_de_voto_nome,moment)
+);
+
+ 
+CREATE TABLE mesa_de_voto_faculdade(
+    mesa_de_voto_nome varchar(60),
+    faculdade_nome   varchar(60) NOT NULL,
+ 
+    PRIMARY KEY(mesa_de_voto_nome)
+);
+ 
+CREATE TABLE eleitor_eleicao(
+    eleitor_cc   int,
+    eleicao_ideleicao int,
+ 
+    PRIMARY KEY(eleitor_cc,eleicao_ideleicao)
+);
+ 
+CREATE TABLE departamento_mesa_de_voto(
+    departamento_nome varchar(60) NOT NULL,
+    mesa_de_voto_nome varchar(60),
+ 
+    PRIMARY KEY(mesa_de_voto_nome)
+);
+ 
+CREATE TABLE departamento_faculdade(
+    departamento_nome varchar(60),
+    faculdade_nome   varchar(60) NOT NULL,
+ 
+    PRIMARY KEY(departamento_nome)
+);
+ 
+CREATE TABLE eleitor_departamento(
+    eleitor_cc   int,
+    departamento_nome varchar(60) NOT NULL,
+ 
+    PRIMARY KEY(eleitor_cc)
+);
+
+CREATE TABLE tipo_eleitores_vota(
+    id_lista int NOT NULL,
+    ideleicao1 int NOT NULL,
+ 
+    PRIMARY KEY(id_lista)
+);
+
+CREATE TABLE votoscandidatos(
+    nome_mesa varchar(60) NOT NULL,
+    id_lista int NOT NULL,
+    num_votos int,
+
+    PRIMARY KEY(nome_mesa,id_lista)
+);
+
+
+ALTER TABLE eleitor_mesa_insta ADD CONSTRAINT eleitor_mesa_insta_fk1 FOREIGN KEY (eleitor_cc) REFERENCES eleitor(cc);
+ALTER TABLE eleitor_mesa_insta ADD CONSTRAINT eleitor_mesa_insta_fk2 FOREIGN KEY (mesa_de_voto_nome) REFERENCES mesa_de_voto(nome);
+ALTER TABLE votoscandidatos ADD CONSTRAINT votoscandidatos_fk1 FOREIGN KEY (nome_mesa) REFERENCES mesa_de_voto(nome);
+ALTER TABLE votoscandidatos ADD CONSTRAINT votoscandidatos_fk2 FOREIGN KEY (id_lista) REFERENCES candidato(id);
+ALTER TABLE votosbna ADD CONSTRAINT votosbna_fk1 FOREIGN KEY (mesa_de_voto_nome) REFERENCES mesa_de_voto(nome);
+ALTER TABLE votosbna ADD CONSTRAINT votosbna_fk2 FOREIGN KEY (eleicao_ideleicao) REFERENCES eleicao(ideleicao);
+ALTER TABLE eleitor_faculdade ADD CONSTRAINT eleitor_faculdade_fk1 FOREIGN KEY (eleitor_cc) REFERENCES eleitor(cc);
+ALTER TABLE eleitor_faculdade ADD CONSTRAINT eleitor_faculdade_fk2 FOREIGN KEY (faculdade_nome) REFERENCES faculdade(nome);
+ALTER TABLE eleitor_mesa_de_voto ADD CONSTRAINT eleitor_mesa_de_voto_fk1 FOREIGN KEY (eleitor_cc) REFERENCES eleitor(cc);
+ALTER TABLE eleitor_mesa_de_voto ADD CONSTRAINT eleitor_mesa_de_voto_fk2 FOREIGN KEY (mesa_de_voto_nome) REFERENCES mesa_de_voto(nome);
+ALTER TABLE mesa_de_voto_faculdade ADD CONSTRAINT mesa_de_voto_faculdade_fk1 FOREIGN KEY (mesa_de_voto_nome) REFERENCES mesa_de_voto(nome);
+ALTER TABLE mesa_de_voto_faculdade ADD CONSTRAINT mesa_de_voto_faculdade_fk2 FOREIGN KEY (faculdade_nome) REFERENCES faculdade(nome);
+ALTER TABLE eleitor_eleicao ADD CONSTRAINT eleitor_eleicao_fk1 FOREIGN KEY (eleitor_cc) REFERENCES eleitor(cc);
+ALTER TABLE eleitor_eleicao ADD CONSTRAINT eleitor_eleicao_fk2 FOREIGN KEY (eleicao_ideleicao) REFERENCES eleicao(ideleicao);
+ALTER TABLE departamento_mesa_de_voto ADD CONSTRAINT departamento_mesa_de_voto_fk1 FOREIGN KEY (departamento_nome) REFERENCES departamento(nome);
+ALTER TABLE departamento_mesa_de_voto ADD CONSTRAINT departamento_mesa_de_voto_fk2 FOREIGN KEY (mesa_de_voto_nome) REFERENCES mesa_de_voto(nome);
+ALTER TABLE departamento_faculdade ADD CONSTRAINT departamento_faculdade_fk1 FOREIGN KEY (departamento_nome) REFERENCES departamento(nome);
+ALTER TABLE departamento_faculdade ADD CONSTRAINT departamento_faculdade_fk2 FOREIGN KEY (faculdade_nome) REFERENCES faculdade(nome);
+ALTER TABLE eleitor_departamento ADD CONSTRAINT eleitor_departamento_fk1 FOREIGN KEY (eleitor_cc) REFERENCES eleitor(cc);
+ALTER TABLE eleitor_departamento ADD CONSTRAINT eleitor_departamento_fk2 FOREIGN KEY (departamento_nome) REFERENCES departamento(nome);
+ALTER TABLE eleicao_departamento ADD CONSTRAINT eleicao_departamento_fk1 FOREIGN KEY (ideleicao1) REFERENCES eleicao(ideleicao);
+ALTER TABLE eleicao_departamento ADD CONSTRAINT eleicao_departamento_fk2 FOREIGN KEY (departamento_nome) REFERENCES departamento(nome);
+ALTER TABLE eleicao_faculdade ADD CONSTRAINT eleicao_faculdade_fk1 FOREIGN KEY (ideleicao1) REFERENCES eleicao(ideleicao);
+ALTER TABLE eleicao_faculdade ADD CONSTRAINT eleicao_faculdade_fk2 FOREIGN KEY (faculdade_nome) REFERENCES faculdade(nome);
+ALTER TABLE tipo_eleitores_vota ADD CONSTRAINT tipo_eleitores_vota_fk1 FOREIGN KEY (ideleicao1) REFERENCES eleicao(ideleicao);
+ALTER TABLE tipo_eleitores_vota ADD CONSTRAINT tipo_eleitores_vota_fk2 FOREIGN KEY (id_lista) REFERENCES candidato(id);
+
+
+CREATE TABLE eleitor_lista_in(
+    cc_user   int NOT NULL,
+    id_lista  int NOT NULL,
+ 
+    PRIMARY KEY(cc_user,id_lista)
+);
+
+ALTER TABLE eleitor_lista_in ADD CONSTRAINT eleitor_lista_in_fk1 FOREIGN KEY (cc_user) REFERENCES eleitor(cc);
+ALTER TABLE eleitor_lista_in ADD CONSTRAINT eleitor_lista_in_fk2 FOREIGN KEY (id_lista) REFERENCES candidato(id);
